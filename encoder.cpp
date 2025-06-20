@@ -24,13 +24,6 @@ f32 get_left_distance() {
   last_ticks_left = left_ticks_new;
   f32 distance_left = 2 * M_PI * WHEEL_RADIUS * delta_ticks_left / (TICKS_PER_REVOLUTION);
   return distance_left;
-
-
-
-
-
-
-  return 0;
 }
 void encoders_init() {
 
@@ -45,4 +38,7 @@ void encoders_init() {
   // clear the encoder's raw count and set the tracked count to zero
   encoder_right.clearCount();
   encoder_left.clearCount();
+  // these are inplace but thinking for a use for it
+  // encoder2.pauseCount();
+  // encoder2.resumeCount();
 }
