@@ -8,9 +8,9 @@
 #include "kinematics.h"
 
 
-f32 x_RFID = 0.0f, y_RFID = 0.0f;
 f32 theta_encoders = 0.0f;
 f32 theta = 0;
+f32 RFID_x_old=0,RFID_y_old=0;
 /*
  * update robot state x ,y , theta
  */
@@ -29,8 +29,13 @@ void update_odometry(RobotData* robot_t)
 
 
     //read RFID
-    // robot_t->x_current = RFID_read_x;
-    // robot_t->y_current = RFID_read_y;
+    // if(RFID_x_old!=RFID_read_x &&RFID_y_old !=RFID_read_y){
+            // robot_t->x_current = RFID_read_x;
+            // robot_t->y_current = RFID_read_y;
+            //  RFID_x_old=RFID_read_x
+            //  RFID_y_old =RFID_read_y
+    // }
+
 
     robot_t->dx = robot_t->x_target - robot_t->x_current;
     robot_t->dy = robot_t->y_target - robot_t->y_current;

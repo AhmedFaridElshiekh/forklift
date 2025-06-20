@@ -4,6 +4,8 @@
 #include "pid.h"
 #include "robot.h"
 #include "encoder.h"
+#include "imu.h"
+
 RobotData robot_t;
 void robot_init();
 
@@ -21,12 +23,19 @@ size_t num_waypoints = sizeof(waypoints) / sizeof(waypoints[0]);
 void setup() {
   // put your setup code here, to run once:
   robot_init();
-  //IMU_Init();
+  // this is from mpu library
+  // initialize serial communication
+    // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
+    // it's really up to you depending on your project)
+    Serial.begin(38400);
+    //  	Serial.begin(115200);
+      MPU6050_init();
+
+
   // RFID_Init();
   encoders_init();
   robot_t.x_target = waypoints[0][0];
   robot_t.y_target = waypoints[0][1];
-  	Serial.begin(115200);
 }
 
 void loop() {
