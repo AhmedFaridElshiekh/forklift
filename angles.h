@@ -23,4 +23,4 @@ f32 normalize_angle(f32 theta);
 u8 has_reached_target(RobotData* robot_t);
 
 
-#endif //ANGLES_H
+#endif  //ANGLES_H

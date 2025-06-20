@@ -16,22 +16,18 @@
  *  robot_t Pointer to the RobotData structure containing robot state and parameters.
 */
 
-void compute_velocity(f32 set_point_angle, f32 set_point_distance, RobotData* robot_t)
-{
-    f32 desired_linear_velocity;
-    f32 desired_angular_velocity;
+void compute_velocity(f32 set_point_angle, f32 set_point_distance, RobotData* robot_t) {
+  f32 desired_linear_velocity;
+  f32 desired_angular_velocity;
 
-    if (robot_t->state == MOVE_FORWARD)
-    {
-        desired_angular_velocity = PIDController_Update(&robot_t->pid_heading, set_point_angle, robot_t->gyro[2]);
-        desired_linear_velocity = PIDController_Update(&robot_t->pid_linear, set_point_distance,
-                                                       robot_t->distance_encoders);
-        // maybe change error to distance_error*cos(theta)
-        uni_to_diff(desired_angular_velocity, desired_linear_velocity, robot_t);
-    }
-    else if (robot_t->state == ROTATE_TO_TARGET)
-    {
-        desired_angular_velocity = PIDController_Update(&robot_t->pid_heading, set_point_angle, robot_t->gyro[2]);
-        uni_to_diff(desired_angular_velocity, 0.0f, robot_t);
-    }
+  if (robot_t->state == MOVE_FORWARD) {
+    desired_angular_velocity = PIDController_Update(&robot_t->pid_heading, set_point_angle, robot_t->gyro[2]);
+    desired_linear_velocity = PIDController_Update(&robot_t->pid_linear, set_point_distance,
+                                                   robot_t->distance_encoders);
+    // maybe change error to distance_error*cos(theta)
+    uni_to_diff(desired_angular_velocity, desired_linear_velocity, robot_t);
+  } else if (robot_t->state == ROTATE_TO_TARGET) {
+    desired_angular_velocity = PIDController_Update(&robot_t->pid_heading, set_point_angle, robot_t->gyro[2]);
+    uni_to_diff(desired_angular_velocity, 0.0f, robot_t);
+  }
 }

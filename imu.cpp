@@ -5,7 +5,7 @@
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-    #include "Wire.h"
+#include "Wire.h"
 #endif
 
 // class default I2C address is 0x68
@@ -31,58 +31,56 @@ unsigned long lastTime = 0;
 bool blinkState = false;
 
 
-void MPU6050_init(void){
-// join I2C bus (I2Cdev library doesn't do this automatically)
-    #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        Wire.begin(21, 22);
-    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-        Fastwire::setup(400, true);
-    #endif
+void IMU_init(void) {
+  // join I2C bus (I2Cdev library doesn't do this automatically)
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+  Wire.begin(21, 22);
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+  Fastwire::setup(400, true);
+#endif
 
-    // initialize device
-    Serial.println("Initializing I2C devices...");
-    accelgyro.initialize();
+  // initialize device
+  Serial.println("Initializing I2C devices...");
+  accelgyro.initialize();
 
-    // verify connection
-    Serial.println("Testing device connections...");
-    Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+  // verify connection
+  Serial.println("Testing device connections...");
+  Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
 
-    // configure Arduino LED pin for output
-    pinMode(LED_PIN, OUTPUT);
+  // configure Arduino LED pin for output
+  pinMode(LED_PIN, OUTPUT);
 }
 /*
 *change gyro readings "angular velocity" into angle in radian by multiplying by time 
 */
-f32 angular_to_angle(int16_t angular_speed,f32* old_angle){
-    float dt = (millis() - lastTime) / 1000.0;
-    *old_angle += angular_speed * dt; 
-    lastTime = millis();
-    return normalize_angle(*old_angle);
+f32 angular_to_angle(int16_t angular_speed, f32* old_angle) {
+  float dt = (millis() - lastTime) / 1000.0;
+  *old_angle += angular_speed * dt;
+  lastTime = millis();
+  return normalize_angle(*old_angle);
 }
 
-void gyro_signals(RobotData* robot_t){
-    // read raw accel/gyro measurements from device
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+void gyro_signals(RobotData* robot_t) {
+  // read raw accel/gyro measurements from device
+  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-    // these methods (and a few others) are also available
-    //accelgyro.getAcceleration(&ax, &ay, &az);
-    //accelgyro.getRotation(&gx, &gy, &gz);
+  // these methods (and a few others) are also available
+  //accelgyro.getAcceleration(&ax, &ay, &az);
+  //accelgyro.getRotation(&gx, &gy, &gz);
 
-    #ifdef OUTPUT_READABLE_ACCELGYRO
-        // display tab-separated accel/gyro x/y/z values
-        // Serial.print("a/g:\t");
-        // Serial.print(ax); Serial.print("\t");
-        // Serial.print(ay); Serial.print("\t");
-        // Serial.print(az); Serial.print("\t");
-        // Serial.print(gx); Serial.print("\t");
-        // Serial.print(gy); Serial.print("\t");
-        // Serial.println(gz);
-        robot_t->gyro[0]=angular_to_angle(gx, &robot_t->gyro[0]);
-        robot_t->gyro[1]=angular_to_angle(gy, &robot_t->gyro[1]);
-        robot_t->gyro[2]=angular_to_angle(gz, &robot_t->gyro[2]);
-    #endif
-    // 
-
+#ifdef OUTPUT_READABLE_ACCELGYRO
+  // display tab-separated accel/gyro x/y/z values
+  // Serial.print("a/g:\t");
+  // Serial.print(ax); Serial.print("\t");
+  // Serial.print(ay); Serial.print("\t");
+  // Serial.print(az); Serial.print("\t");
+  // Serial.print(gx); Serial.print("\t");
+  // Serial.print(gy); Serial.print("\t");
+  // Serial.println(gz);
+  robot_t->gyro[0] = angular_to_angle(gx, &robot_t->gyro[0]);
+  robot_t->gyro[1] = angular_to_angle(gy, &robot_t->gyro[1]);
+  robot_t->gyro[2] = angular_to_angle(gz, &robot_t->gyro[2]);
+#endif
+  //
 }
-

@@ -5,16 +5,18 @@
 #include "robot.h"
 #include "encoder.h"
 #include "imu.h"
+#include "rfid.h"
+#include "firebase_handler.h"
+#include "motors.h"
+
 
 RobotData robot_t;
 void robot_init();
 
 // Waypoints (x, y) in fixed-point (e.g., 0.1m resolution)
-f32 waypoints[][2] = {
-  { 0, 1 },  // (0.0, 1.0m)
-  { 1, 1 },  // (2.0m, 1.0m)
-  { 1, 0 },  // (2.0m, 0.0)
-  { 2, 0 }   // (3.0m, 0.0)
+f32 waypoints[20][2] = {
+  { 0, 0 }
+  // (3.0m, 0.0)
 
 };
 size_t num_waypoints = sizeof(waypoints) / sizeof(waypoints[0]);
@@ -23,13 +25,35 @@ size_t num_waypoints = sizeof(waypoints) / sizeof(waypoints[0]);
 void setup() {
   // put your setup code here, to run once:
   robot_init();
+  initWiFi();
+  initFirebase();
+  encoders_init();
+  initRFID();
+  init_motors();
+
+
+
   // this is from mpu library
   // initialize serial communication
-    // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
-    // it's really up to you depending on your project)
-    Serial.begin(38400);
-    //  	Serial.begin(115200);
-      MPU6050_init();
+  // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
+  // it's really up to you depending on your project)
+  Serial.begin(38400);
+  //  	Serial.begin(115200);
+  IMU_init();
+
+  // there is a problem with type conversion so I will pass one and then cast
+  int waypoints_temp[20][2];
+  for (int i = 0; i < 20; i++) {
+    for (int j = 0 ;j < 2; j++) {
+      waypoints_temp[i][j] = (int)waypoints[i][j];
+    }
+  }
+  fetchPathPoints(waypoints_temp);
+   for(int i=0;i<20;i++){
+    for (int j = 0 ;j < 2; j++) {
+      waypoints[i][j] = waypoints_temp[i][j];
+    }
+  }
 
 
   // RFID_Init();
@@ -60,6 +84,13 @@ void robot_init() {
     robot_t.gyro[i] = 0.0f;
   }
   robot_t.distance_encoders = 0.0f;
+
+
+  // Initialize PID controllers
+  PIDController_Init(&robot_t.pid_linear);
+  PIDController_Init(&robot_t.pid_heading);
+
+
   // Set PID parameters (previously globals)
   robot_t.pid_linear.Kp = KP_LINEAR_VELOCITY;
   robot_t.pid_linear.Ki = KI_LINEAR_VELOCITY;
@@ -82,9 +113,7 @@ void robot_init() {
   robot_t.pid_heading.limMaxInt = PID_LIM_MAX_INT;
   robot_t.pid_heading.T = DT;
   robot_t.pid_heading.flag = HEADING_C;
-  // Initialize PID controllers
-  PIDController_Init(&robot_t.pid_linear);
-  PIDController_Init(&robot_t.pid_heading);
+
   // Initialize speeds
   robot_t.r_speed = 0.0f;
   robot_t.l_speed = 0.0f;

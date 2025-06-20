@@ -5,6 +5,7 @@
 #include "encoder.h"
 #include "angles.h"
 #include "kinematics.h"
+#include "config.h"
 int32_t last_ticks_left = 0;
 int32_t last_ticks_right = 0;
 ESP32Encoder encoder_right;
@@ -13,7 +14,7 @@ f32 get_right_distance() {
   int32_t right_ticks_new = encoder_right.getCount();
   int32_t delta_ticks_right = right_ticks_new - last_ticks_right;
   last_ticks_right = right_ticks_new;
-  f32 distance_right = 2 * M_PI * WHEEL_RADIUS * delta_ticks_right / (TICKS_PER_REVOLUTION);
+  f32 distance_right = 2 * M_PI * WHEEL_RADIUS * delta_ticks_right / (COUNTS_PER_REV * GEAR_RATIO);
 
   return distance_right;
 }
@@ -22,7 +23,7 @@ f32 get_left_distance() {
   int32_t left_ticks_new = encoder_left.getCount();
   int32_t delta_ticks_left = left_ticks_new - last_ticks_left;
   last_ticks_left = left_ticks_new;
-  f32 distance_left = 2 * M_PI * WHEEL_RADIUS * delta_ticks_left / (TICKS_PER_REVOLUTION);
+  f32 distance_left = 2 * M_PI * WHEEL_RADIUS * delta_ticks_left / (COUNTS_PER_REV * GEAR_RATIO);
   return distance_left;
 }
 void encoders_init() {
@@ -31,9 +32,9 @@ void encoders_init() {
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
 
   // use pin 19 and 18 for the first encoder
-  encoder_right.attachFullQuad(19, 18);
+  encoder_right.attachFullQuad(ENCODER1_A, ENCODER1_B);
   // use pin 17 and 16 for the second encoder
-  encoder_left.attachFullQuad(17, 16);
+  encoder_left.attachFullQuad(ENCODER2_A, ENCODER2_B);
 
   // clear the encoder's raw count and set the tracked count to zero
   encoder_right.clearCount();
