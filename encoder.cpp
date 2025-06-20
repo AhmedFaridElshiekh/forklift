@@ -3,25 +3,46 @@
 //
 
 #include "encoder.h"
+#include "angles.h"
+#include "kinematics.h"
+int32_t last_ticks_left = 0;
+int32_t last_ticks_right = 0;
+ESP32Encoder encoder_right;
+ESP32Encoder encoder_left;
+f32 get_right_distance() {
+  int32_t right_ticks_new = encoder_right.getCount();
+  int32_t delta_ticks_right = right_ticks_new - last_ticks_right;
+  last_ticks_right = right_ticks_new;
+  f32 distance_right = 2 * M_PI * WHEEL_RADIUS * delta_ticks_right / (TICKS_PER_REVOLUTION);
 
-f32 get_right_distance()
-{
-    // get number of ticks
-    // # Calculate the delta for ticks since last read
-    //     delta_ticks_left = tick_count_left_new - last_ticks_left
-    //     delta_ticks_right = tick_count_right_new - last_ticks_right
-    //
-    //     # Update counters to next read
-    //     last_ticks_left = tick_count_left
-    //     last_ticks_right = tick_count_right
-    //
-    //     # Calculate new pose
-    //     Dl = 2*pi * r * delta_ticks_left/(number of ticks per revolution)
-    //     Dr = same
-    return 0;
+  return distance_right;
 }
 
-f32 get_left_distance()
-{
-    return 0;
+f32 get_left_distance() {
+  int32_t left_ticks_new = encoder_left.getCount();
+  int32_t delta_ticks_left = left_ticks_new - last_ticks_left;
+  last_ticks_left = left_ticks_new;
+  f32 distance_left = 2 * M_PI * WHEEL_RADIUS * delta_ticks_left / (TICKS_PER_REVOLUTION);
+  return distance_left;
+
+
+
+
+
+
+  return 0;
+}
+void encoders_init() {
+
+  // Enable the weak pull up resistors
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+
+  // use pin 19 and 18 for the first encoder
+  encoder_right.attachFullQuad(19, 18);
+  // use pin 17 and 16 for the second encoder
+  encoder_left.attachFullQuad(17, 16);
+
+  // clear the encoder's raw count and set the tracked count to zero
+  encoder_right.clearCount();
+  encoder_left.clearCount();
 }

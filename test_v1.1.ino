@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "pid.h"
 #include "robot.h"
+#include "encoder.h"
 RobotData robot_t;
 void robot_init();
 
@@ -22,9 +23,10 @@ void setup() {
   robot_init();
   //IMU_Init();
   // RFID_Init();
-  //encoders_init();
+  encoders_init();
   robot_t.x_target = waypoints[0][0];
   robot_t.y_target = waypoints[0][1];
+  	Serial.begin(115200);
 }
 
 void loop() {
