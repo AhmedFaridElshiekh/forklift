@@ -7,6 +7,7 @@
 #include "STD_TYPES.h"
 #include "robot.h"
 
-void compute_velocity(f32 set_point_angle, f32 set_point_distance, RobotData* robot_t);
+void compute_velocity(f32 set_point_angle, f32 set_point_distance,
+                      RobotData *robot_t);
 
-#endif  //COMPUTE_VELOCITY_H
+#endif // COMPUTE_VELOCITY_H

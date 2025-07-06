@@ -6,7 +6,6 @@
 #define UPDATEODMETRY_H
 #include "STD_TYPES.h"
 #include "robot.h"
-void update_odometry(RobotData* robot_t);
+void update_odometry(RobotData *robot_t);
 
-
-#endif  //UPDATEODMETRY_H
+#endif // UPDATEODMETRY_H

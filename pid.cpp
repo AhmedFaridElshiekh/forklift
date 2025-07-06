@@ -5,79 +5,69 @@
 #include "pid.h"
 #include "angles.h"
 
+void PIDController_Init(PIDController *pid) {
+  /* Clear controller variables */
+  pid->integrator = 0.0f;
+  pid->prevError = 0.0f;
 
-void PIDController_Init(PIDController* pid)
-{
-    /* Clear controller variables */
-    pid->integrator = 0.0f;
-    pid->prevError = 0.0f;
+  pid->differentiator = 0.0f;
+  pid->prevMeasurement = 0.0f;
 
-    pid->differentiator = 0.0f;
-    pid->prevMeasurement = 0.0f;
-
-    pid->out = 0.0f;
+  pid->out = 0.0f;
 }
 
-f32 PIDController_Update(PIDController* pid, f32 setpoint, f32 measurement)
-{
-    /*
-    * Error signal
-    */
-    f32 error = setpoint - measurement;
-    if (pid->flag == HEADING_C)
-        error = normalize_angle(error);
+f32 PIDController_Update(PIDController *pid, f32 setpoint, f32 measurement) {
+  /*
+   * Error signal
+   */
+  f32 error = setpoint - measurement;
+  if (pid->flag == HEADING_C)
+    error = normalize_angle(error);
 
+  /*
+   * Proportional
+   */
+  f32 proportional = pid->Kp * error;
 
-    /*
-    * Proportional
-    */
-    f32 proportional = pid->Kp * error;
+  /*
+   * Integral
+   */
+  pid->integrator =
+      pid->integrator + 0.5f * pid->Ki * pid->T * (error + pid->prevError);
 
+  /* Anti-wind-up via integrator clamping */
+  if (pid->integrator > pid->limMaxInt) {
+    pid->integrator = pid->limMaxInt;
+  } else if (pid->integrator < pid->limMinInt) {
+    pid->integrator = pid->limMinInt;
+  }
 
-    /*
-    * Integral
-    */
-    pid->integrator = pid->integrator + 0.5f * pid->Ki * pid->T * (error + pid->prevError);
+  /*
+   * Derivative (band-limited differentiator)
+   */
 
-    /* Anti-wind-up via integrator clamping */
-    if (pid->integrator > pid->limMaxInt)
-    {
-        pid->integrator = pid->limMaxInt;
-    }
-    else if (pid->integrator < pid->limMinInt)
-    {
-        pid->integrator = pid->limMinInt;
-    }
+  pid->differentiator = -(2.0f * pid->Kd * (measurement - pid->prevMeasurement)
+                          /* Note: derivative on measurement, therefore minus
+                             sign in front of equation! */
+                          + (2.0f * pid->tau - pid->T) * pid->differentiator) /
+                        (2.0f * pid->tau + pid->T);
 
+  /*
+   * Compute output and apply limits
+   */
+  pid->out = proportional + pid->integrator + pid->differentiator;
 
-    /*
-    * Derivative (band-limited differentiator)
-    */
+  if (pid->out > pid->limMax) {
+    pid->out = pid->limMax;
+  } else if (pid->out < pid->limMin) {
+    pid->out = pid->limMin;
+  }
 
-    pid->differentiator = -(2.0f * pid->Kd * (measurement - pid->prevMeasurement)
-            /* Note: derivative on measurement, therefore minus sign in front of equation! */
-            + (2.0f * pid->tau - pid->T) * pid->differentiator)
-        / (2.0f * pid->tau + pid->T);
+  /* Store error and measurement for later use */
+  pid->prevError = error;
+  pid->prevMeasurement = measurement;
 
+  /* Return controller output */
 
-    /*
-    * Compute output and apply limits
-    */
-    pid->out = proportional + pid->integrator + pid->differentiator;
-
-    if (pid->out > pid->limMax)
-    {
-        pid->out = pid->limMax;
-    }
-    else if (pid->out < pid->limMin)
-    {
-        pid->out = pid->limMin;
-    }
-
-    /* Store error and measurement for later use */
-    pid->prevError = error;
-    pid->prevMeasurement = measurement;
-
-    /* Return controller output */
-    return pid->out;
+  return pid->out;
 }

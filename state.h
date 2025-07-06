@@ -5,13 +5,12 @@
 #ifndef STATE_H
 #define STATE_H
 
-typedef enum
-{
-    IDLE,
-    ROTATE_TO_TARGET,
-    MOVE_FORWARD,
-    ARRIVED,
-    CHARGING,
-    LIFT
+typedef enum {
+  IDLE,
+  ROTATE_TO_TARGET,
+  MOVE_FORWARD,
+  ARRIVED,
+  CHARGING,
+  LIFT
 } RobotState;
-#endif //STATE_H
+#endif // STATE_H

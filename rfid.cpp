@@ -12,7 +12,7 @@ void initRFID() {
     key.keyByte[i] = 0xFF;
   }
 
-  Serial.println("📢 RFID ready to scan...");
+  Serial.println(" RFID ready to scan...");
 }
 
 bool readXYFromCard(byte &xValue, byte &yValue) {
@@ -21,10 +21,11 @@ bool readXYFromCard(byte &xValue, byte &yValue) {
 
   MFRC522::StatusCode status;
 
-  // التوثيق
-  status = rfid.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key, &(rfid.uid));
+  // authentication
+  status = rfid.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key,
+                                 &(rfid.uid));
   if (status != MFRC522::STATUS_OK) {
-    Serial.print("❌ Auth failed: ");
+    Serial.print(" Auth failed: ");
     Serial.println(rfid.GetStatusCodeName(status));
     return false;
   }
@@ -32,16 +33,18 @@ bool readXYFromCard(byte &xValue, byte &yValue) {
   byte buffer[18];
   byte size = sizeof(buffer);
 
-  // قراءة البيانات
+  // read data from the card
   status = rfid.MIFARE_Read(block, buffer, &size);
   if (status != MFRC522::STATUS_OK) {
-    Serial.print("❌ Read failed: ");
+    Serial.print(" Read failed: ");
     Serial.println(rfid.GetStatusCodeName(status));
     return false;
   }
 
   xValue = buffer[0];
   yValue = buffer[1];
+  Serial.println(xValue);
+  Serial.println(yValue);
 
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
