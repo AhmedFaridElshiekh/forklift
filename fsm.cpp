@@ -19,9 +19,9 @@ void fsm_update(RobotData *robot_t, f32 points[][2], size_t num_points) {
   Serial.print("state: ");
   Serial.println(robot_t->state);
 
-  // if (robot_t->battery_state == BATTERY_CRITICAL) {
-  //   robot_t->state = CHARGING;
-  // }
+  if (robot_t->battery_state == BATTERY_CRITICAL) {
+    robot_t->state = CHARGING;
+  }
 
   update_odometry(robot_t);  // update robot x,y,theta
   f32 desired_angle = compute_desired_angle(robot_t);
@@ -79,30 +79,30 @@ void fsm_update(RobotData *robot_t, f32 points[][2], size_t num_points) {
 
       break;
     case LIFT:
-      // compute_velocity(desired_angle, .2, robot_t);
-      // robot_t->fork_state = DOWN;
-      // fork(robot_t);
-      // if (digitalRead(LIMIT_SWITCH_DOWN) == 1) {
-      //   // if the limit switch is pressed
-      //   // keep the same tension
-      //   if (digitalRead(LIMIT_SWITCH_FORK) == 1) {
-      //     robot_t->fork_state = UP;
-      //     fork(robot_t);
-      //   } 
-      //   else {
-      //     //setMotor()
-      //     Serial.print("set motors to specif speed until it reaches the card");
-      //   }
-      // } 
-      // else if (digitalRead(LIMIT_SWITCH_UP) == 1) {
-      //   robot_t->fork_state = LIFTING;
-      // }
-      // if (robot_t->fork_state == LIFTING && has_reached_target(robot_t)) {
+      compute_velocity(desired_angle, .2, robot_t);
+      robot_t->fork_state = DOWN;
+      fork(robot_t);
+      if (digitalRead(LIMIT_SWITCH_DOWN) == 1) {
+        // if the limit switch is pressed
+        // keep the same tension
+        if (digitalRead(LIMIT_SWITCH_FORK) == 1) {
+          robot_t->fork_state = UP;
+          fork(robot_t);
+        } 
+        else {
+          //setMotor()
+          Serial.print("set motors to specif speed until it reaches the card");
+        }
+      } 
+      else if (digitalRead(LIMIT_SWITCH_UP) == 1) {
+        robot_t->fork_state = LIFTING;
+      }
+      if (robot_t->fork_state == LIFTING && has_reached_target(robot_t)) {
 
-      //   // get new data
-      //   // set_target(robot_t, points, num_points);
-      //   robot_t->state = ROTATE_TO_TARGET;
-      // }
+        // get new data
+        // set_target(robot_t, points, num_points);
+        robot_t->state = ROTATE_TO_TARGET;
+      }
 
       break;
 

@@ -1,12 +1,12 @@
 #include "STD_TYPES.h"
-// #include "encoder.h"
-// #include "fsm.h"
+#include "encoder.h"
+#include "fsm.h"
 #include "imu.h"
-// #include "pid.h"
+#include "pid.h"
 #include "robot.h"
 
-// #include "rfid.h"
-// #include "motors.h"
+#include "rfid.h"
+#include "motors.h"
 
 RobotData robot_t;
 void robot_init();
@@ -21,16 +21,10 @@ void setup() {
   Serial.begin(115200);
 
   // // put your setup code here, to run once:
-  // robot_init();
-  // encoders_init();
-  // // initRFID();
-  // init_motors();
-
-  // this is from mpu library
-  // initialize serial communication
-  // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
-  // it's really up to you depending on your project)
-  //  	Serial.begin(115200);
+  robot_init();
+  encoders_init();
+  initRFID();
+  init_motors();
   IMU_init();
 }
 
